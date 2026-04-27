@@ -30,8 +30,8 @@
 }
 
 body.theme-dark {
-    --accent-color: hsl(0, 0%, 100%);
-    --accent-color-contrast: hsl(0, 0%, 50%);
+    --accent-color: hsl(327, 56%, 72%);
+    --accent-color-contrast: hsl(337, 62%, 54%);
 
     --background-color: hsl(0, 0%, 6%);
     --background-color-contrast: hsl(0, 0%, 15%);
