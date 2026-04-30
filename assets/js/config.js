@@ -1,5 +1,5 @@
 // Configuration options
-const init_phones = ["Universal ∆", "AudioSense DT200"],// Optional. Which graphs to display on initial load. Note: Share URLs will override this set
+const init_phones = ["∆ Headphones.com IEM Diffuse Field HRTF Target", "AudioSense DT200"],// Optional. Which graphs to display on initial load. Note: Share URLs will override this set
       DIR = "data/",                                // Directory where graph files are stored
       default_channels = ["L","R"],                 // Which channels to display. Avoid javascript errors if loading just one channel per phone
       default_normalization = "dB",                 // Sets default graph normalization mode. Accepts "dB" or "Hz"
@@ -40,7 +40,7 @@ const init_phones = ["Universal ∆", "AudioSense DT200"],// Optional. Which gra
 
 // Specify which targets to display
 const targets = [
-    { type:"∆",  files:["Universal ∆"] },
+    { type:"∆",  files:["∆ Headphones.com IEM Diffuse Field HRTF", "∆ JM-1 DF"] },
     { type:"Neutral",    files:["KEMAR DF","IEF Neutral 2023","Etymotic"] },
     { type:"Preference", files:["Harman IE 2019v2","Harman IE 2017v2","Rtings","Sonarworks"] }
 ];
@@ -58,8 +58,8 @@ const  preference_bounds_name = "Bounds",              // Preference bounds name
        default_tilt = -1,                            // Default Custom DF tilt value
        default_ear = 0,                                // Default Custom DF ear gain value
        default_treble = 0,                             // Default Custom DF treble gain value
-       tiltableTargets = ["KEMAR DF", "Universal ∆"],                 // Targets that are allowed to be tilted
-       compTargets = ["KEMAR DF", "Universal ∆"],                     // Targets that are allowed to be used for compensation
+       tiltableTargets = ["KEMAR DF", "∆ JM-1 DF", "∆ Headphones.com IEM Diffuse Field HRTF"],                 // Targets that are allowed to be tilted
+       compTargets = ["KEMAR DF", "∆ JM-1 DF", "∆ Headphones.com IEM Diffuse Field HRTF"],                     // Targets that are allowed to be used for compensation
        allowCreatorSupport = true;                     // Allow the creator to have a button top right to support them
 
 
