@@ -10,10 +10,6 @@
   },
    {
     "name":   "Truthear",
-    "phones": ["HR"
-              , "HRH"
-              , {"name":"HTH Performance","file":["HTH", "HT5"]}
-              , "Z"
-              , "HTH67" ]
+    "phones": [ {"name": "Nova", "file": ["Truthear Nova"]} ]
   }
 ]
