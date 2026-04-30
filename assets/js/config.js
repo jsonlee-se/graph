@@ -36,7 +36,8 @@ const init_phones = ["∆ Headphones.com IEM Diffuse Field HRTF Target", "AudioS
       extraUploadEnabled = true,                    // Enable upload function
       extraEQEnabled = true,                        // Enable parametic eq function
       extraEQBands = 10,                            // Default EQ bands available
-      extraEQBandsMax = 20;                         // Max EQ bands available
+      extraEQBandsMax = 20,                         // Max EQ bands available
+      num_samples = 5;
 
 // Specify which targets to display
 const targets = [
