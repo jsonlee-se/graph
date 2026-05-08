@@ -11,5 +11,9 @@
    {
     "name":   "Truthear",
     "phones": [ {"name": "Nova", "file": ["Truthear Nova"]} ]
+  },
+  {
+    "name": "Crinear",
+    "phones": [{"name":"Reference", "file": ["Crinear Reference"]}]
   }
 ]
