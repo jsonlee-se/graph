@@ -1,19 +1,29 @@
 [
-  {
-    "name": "AudioSense",
-    "phones": [
-      {
-        "name": "DT200",
-        "file": "AudioSense DT200"
-      }
-    ]
-  },
    {
     "name":   "Truthear",
-    "phones": [ {"name": "Nova", "file": ["Truthear Nova"]} ]
+    "phones": [ 
+      {"name": "Nova", "file": ["Truthear Nova"]},
+      {"name": "Pure", "file": ["Truthear Pure"]}
+   ]
   },
   {
     "name": "Crinear",
     "phones": [{"name":"Reference", "file": ["Crinear Reference"]}]
+  },
+  {
+    "name": "Kiwi Ears",
+    "phones": [{"name":"Cadenza", "file": ["Kiwi Ears Cadenza"]}]
+  },
+  {
+    "name":"Moondrop",
+    "phones": [
+      {"name": "Blessing 3 Aqua", "file": ["Blessing 3 Aqua"]}
+    ]
+  },
+  {
+    "name": "7Hz",
+    "phones": [
+      {"name": "X Crinacle Diablo", "file": ["7Hz Diablo"]}
+    ]
   }
 ]
