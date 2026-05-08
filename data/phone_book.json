@@ -1,10 +1,9 @@
 [
-   {
-    "name":   "Truthear",
-    "phones": [ 
-      {"name": "Nova", "file": ["Truthear Nova"]},
-      {"name": "Pure", "file": ["Truthear Pure"]}
-   ]
+  {
+    "name": "7Hz",
+    "phones": [
+      {"name": "X Crinacle Diablo", "file": ["7Hz Diablo"]}
+    ]
   },
   {
     "name": "Crinear",
@@ -21,9 +20,17 @@
     ]
   },
   {
-    "name": "7Hz",
+    "name": "Tangzu",
     "phones": [
-      {"name": "X Crinacle Diablo", "file": ["7Hz Diablo"]}
+      {"name":"Wan'er Red Lion", "file":["Wan_er Red Lion"]}
     ]
+  },
+     {
+    "name":   "Truthear",
+    "phones": [ 
+      {"name": "Nova", "file": ["Truthear Nova"]},
+      {"name": "Pure", "file": ["Truthear Pure"]},
+      {"name": "X Crinacle Zero: Blue 2", "file": ["Zero Blue 2"]}
+   ]
   }
 ]
