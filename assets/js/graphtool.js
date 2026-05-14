@@ -3917,7 +3917,7 @@ function addHeader() {
 
     if (allowCreatorSupport) {
         // custom Ko-fi button
-        const scriptHtml = `<a href='https://ko-fi.com/harutohiroki' target='_blank' style="margin-top: auto; margin-bottom: auto; margin-right: 10px"><img height='333' style='border:0px; height:33px;'
+        const scriptHtml = `<a href='https://ko-fi.com/jsonlee' target='_blank' style="margin-top: auto; margin-bottom: auto; margin-right: 10px"><img height='333' style='border:0px; height:33px;'
                             src='https://storage.ko-fi.com/cdn/kofi5.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>`;
         altHeaderElem.insertAdjacentHTML('beforeend', scriptHtml);
     }
