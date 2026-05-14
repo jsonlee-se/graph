@@ -14,6 +14,10 @@
     "phones": [{"name":"Cadenza", "file": ["Kiwi Ears Cadenza"]}]
   },
   {
+    "name": "Letshuoer",
+    "phones": [{"name":"S12 Ultra", "file": ["Letshuoer S12 Ultra"]}]
+  },
+  {
     "name":"Moondrop",
     "phones": [
       {"name": "Blessing 3 Aqua", "file": ["Blessing 3 Aqua"]}
