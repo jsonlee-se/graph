@@ -39,5 +39,9 @@
       {"name": "Pure", "file": ["Truthear Pure"]},
       {"name": "X Crinacle Zero: Blue 2", "file": ["Zero Blue 2"]}
    ]
+  },
+  {
+    "name": "Xenns",
+    "phones": [{"name":"Top Pro", "file":["Xenns Top Pro"]}]
   }
 ]
