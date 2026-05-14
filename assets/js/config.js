@@ -242,10 +242,15 @@ let headerLogoText = "json",
     headerLogoImgUrl = "",
     headerLinks = [
     {
-        name: "Blog (TODO)",
-        url: "https://sample.com",
+        name: "Blog",
+        url: "https://jsonleeblog.com",
         external: true
     },
+          {
+                name: "IEM Ranking",
+                url: "https://www.iemranking.com/",
+                external: true
+          }
 
 ];
 
