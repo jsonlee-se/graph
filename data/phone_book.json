@@ -13,6 +13,10 @@
     ]
   },
   {
+    "name": "Hzsound",
+    "phones": [{"name": "Luna", "file": ["Hzsound Luna"]}]
+  },
+  {
     "name": "Kiwi Ears",
     "phones": [{"name":"Cadenza", "file": ["Kiwi Ears Cadenza"]}]
   },
