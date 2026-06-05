@@ -36,14 +36,18 @@
       {"name":"Wan'er Red Lion", "file":["Wan_er Red Lion"]}
     ]
   },
-     {
+  {
+    "name": "Tanchjim",
+    "phones": [{"name": "Origin Lost Manor", "file":["Lost Manor"]}]
+  },
+  {
     "name":   "Truthear",
     "phones": [ 
       {"name": "Nova", "file": ["Truthear Nova"]},
       {"name": "Pure", "file": ["Truthear Pure"]},
       {"name": "X Crinacle Zero: Blue 2", "file": ["Zero Blue 2"]}
-   ]
-  },
+    ]
+   },
   {
     "name": "Xenns",
     "phones": [{"name":"Top Pro", "file":["Xenns Top Pro"]}]
