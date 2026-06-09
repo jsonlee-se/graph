@@ -13,7 +13,7 @@ const init_phones = ["∆ Headphones.com IEM Diffuse Field HRTF Target", "Crinea
       alt_header_new_tab = false,                   // Clicking alt_header links opens in new tab
       alt_tutorial = false,                          // Display a configurable frequency response guide below the graph
       alt_augment = true,                           // Display augment card in phone list, e.g. review sore, shop link
-      site_url = '/',                               // URL of your graph "homepage"
+      site_url = '/graph',                               // URL of your graph "homepage"
       share_url = true,                             // If true, enables shareable URLs
       watermark_text = "",                 // Optional. Watermark appears behind graphs
       watermark_image_url = "", // Optional. If image file is in same directory as config, can be just the filename
@@ -156,44 +156,8 @@ const linkSets = [
         label: "IEM graph databases",
         links: [
             {
-                name: "Audio Discourse",
-                url: "https://iems.audiodiscourse.com/"
-            },
-            {
-                name: "Bad Guy",
-                url: "https://hbb.squig.link/"
-            },
-            {
-                name: "Banbeucmas",
-                url: "https://banbeu.com/graph/tool/"
-            },
-            {
-                name: "HypetheSonics",
-                url: "https://www.hypethesonics.com/iemdbc/"
-            },
-            {
                 name: "Hangout.Audio",
                 url: "https://graph.hangout.audio/"
-            },
-            {
-                name: "HarutoHiroki",
-                url: "https://graphtool.harutohiroki.com/"
-            },
-            {
-                name: "Precogvision",
-                url: "https://precog.squig.link/"
-            },
-            {
-                name: "Super* Review",
-                url: "https://squig.link/"
-            },
-            {
-                name: "Timmy (Gizaudio)",
-                url: "https://timmyv.squig.link/"
-            },
-            {
-                name: "Rohsa",
-                url: "https://rohsa.gitlab.io/graphtool/"
             },
         ]
     },
@@ -201,21 +165,9 @@ const linkSets = [
         label: "Headphones",
         links: [
             {
-                name: "Audio Discourse",
-                url: "https://headphones.audiodiscourse.com/"
-            },
-            {
-                name: "In-Ear Fidelity",
-                url: "https://crinacle.com/graphs/headphones/graphtool/"
-            },
-            {
                 name: "Listener",
                 url: "https://listener800.github.io/"
             },
-            {
-                name: "Super* Review",
-                url: "https://squig.link/hp.html"
-            }
         ]
     }
 ];
