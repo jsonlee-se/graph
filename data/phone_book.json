@@ -22,13 +22,22 @@
   },
   {
     "name": "Letshuoer",
-    "phones": [{"name":"S12 Ultra", "file": ["Letshuoer S12 Ultra"]}]
+    "phones": [
+      {"name": "Mystic 8", "file": ["Mystic 8"]},
+      {"name":"S12 Ultra", "file": ["Letshuoer S12 Ultra"]}]
   },
   {
     "name":"Moondrop",
     "phones": [
+      {"name": "Aria 2", "file": ["Aria 2"]},
       {"name": "Blessing 3 Aqua", "file": ["Blessing 3 Aqua"]},
-      {"name": "Aria 2", "file": ["Aria 2"]}
+      {"name": "X Girls Frontline 2 Klukai", "file": ["Klukai"]},
+      {"name": "Space Travel 2", "file": ["Space Travel 2"]}
+    ]
+  },{
+    "name": "Samsung",
+    "phones": [
+      {"name": "EHS64", "file": ["EHS64"]}
     ]
   },
   {
@@ -44,6 +53,7 @@
   {
     "name":   "Truthear",
     "phones": [ 
+      {"name": "Gate", "file": ["Gate"]},
       {"name": "Nova", "file": ["Truthear Nova"]},
       {"name": "Pure", "file": ["Truthear Pure"]},
       {"name": "X Crinacle Zero: Blue 2", "file": ["Zero Blue 2"]}
