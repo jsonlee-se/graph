@@ -27,7 +27,8 @@
   {
     "name":"Moondrop",
     "phones": [
-      {"name": "Blessing 3 Aqua", "file": ["Blessing 3 Aqua"]}
+      {"name": "Blessing 3 Aqua", "file": ["Blessing 3 Aqua"]},
+      {"name": "Aria 2", "file": ["Aria 2"]}
     ]
   },
   {
