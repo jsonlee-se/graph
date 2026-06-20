@@ -1014,12 +1014,7 @@ let gpath = gr.insert("g",".dBScaler")
     .attr("stroke-width",2.1)
     .attr("class", "curves-g")
     .attr("mask","url(#graphFade)");
-function hl(p, h) {
-    gpath.selectAll("path").filter(c=>c.p===p).classed("highlight",h);
-}
-let table = doc.select(".curves");
 
-let ld_p1 = 1.1673039782614187;
 function getCurveColor(id, o, hex) {
     let p1 = ld_p1,
         p2 = p1*p1,
@@ -1041,8 +1036,7 @@ function getCurveColor(id, o, hex) {
                       64); //constant luminance
     }
 }
-let getColor_AC = c => getCurveColor(c.p.id, c.o, c.p.hexColor);
-let getColor_ph = (p,i) => getCurveColor(p.id, p.activeCurves[i].o, p.hexColor);
+
 function getDivColor(id, active, hex) {
     let c = getCurveColor(id, 0, hex);
     c.l = 100-(80-Math.min(c.l,60))/(active?1.5:3);
@@ -4389,3 +4383,364 @@ function userConfigApplyNormalization() {
     
     userConfigApplicationActive = 0;
 }
+
+
+/* EQ graph markers + FR curve strokes. Marker UNSEL_/SEL_* fill/stroke: "trace", "graph", or CSS. */
+const EQ_GRAPH_MARKER_HIT_PX = 28;
+const EQ_GRAPH_MARKER_R_BASE = 2.5;
+const EQ_GRAPH_MARKER_UNSEL_SCALE = 1;
+const EQ_GRAPH_MARKER_UNSEL_STROKE = "trace";
+const EQ_GRAPH_MARKER_UNSEL_FILL = "graph";
+const EQ_GRAPH_MARKER_UNSEL_HOVER_SCALE = 1;
+const EQ_GRAPH_MARKER_SEL_SCALE = 1.8;
+const EQ_GRAPH_MARKER_SEL_STROKE = "graph";
+const EQ_GRAPH_MARKER_SEL_FILL = "trace";
+const EQ_GRAPH_MARKER_SEL_HOVER_SCALE = 1.2;
+const EQ_GRAPH_MARKER_STROKE_W = 4;
+const EQ_GRAPH_MARKER_STROKE_HOVER_MULT = 2;
+/** Base stroke width in SVG user units (sample vs main traces). Not overridden by CSS when scoped in style.css. */
+const EQ_GRAPH_TRACE_STROKE_SAMPLE = 1.9;
+const EQ_GRAPH_TRACE_STROKE_NORMAL = 2.3;
+const EQ_GRAPH_TRACE_STROKE_EMPH_MULT = 2;
+
+let gEqFilterMarkers = gr.append("g")
+    .attr("class", "eq-filter-markers")
+    .attr("pointer-events", "none")
+    .attr("mask", "url(#graphFade)");
+let gEqHoverPreview = gr.append("g")
+    .attr("class", "eq-hover-preview")
+    .attr("pointer-events", "none")
+    .attr("mask", "url(#graphFade)");
+let gEqSoundRangeBrush = gr.insert("g", ".eq-hover-preview")
+    .attr("class", "eq-sound-range-brush")
+    .attr("pointer-events", "none")
+    .attr("mask", "url(#graphFade)");
+let eqSoundRangeUiHooks = { syncBrushFromInputs: () => {} };
+let updateEqFilterMarkers = () => {};
+let updateEqTraceOpacity = () => {};
+/** When Parametric EQ tab is active, hides graph traces except model / EQ / target (see addExtra). */
+let applyParametricEqGraphTraceFocus = () => {};
+/** Set in addExtra: after multi-sample FR refine, sync EQ trace (loadFiles late branch has no callback). */
+let eqAfterMultiSampleRawRefined = null;
+/** @type {d3.Selection|null} */
+let graphPlotHitRect = null;
+/** Equalizer-tab graph: pointer gesture for add + vertical gain drag */
+let eqGraphPointerState = null;
+/** Last viewport client position over the graph (mousemove / drag); used to re-apply EQ hover
+    after updateEqFilterMarkers(), e.g. when focusin on a filter field runs in a later frame. */
+let lastGraphPlotPointerClient = null;
+let eqGraphSkipNextClick = false;
+/** After touch on the plot, browsers emit a synthetic click; skip click-to-add so EQ graph edits are mouse-only. */
+let eqGraphSuppressClickAddFromTouch = false;
+let eqGraphTouchSuppressClearTimer = null;
+let eqGraphSkipClickClearTimer = null;
+let eqGraphApplyEqDragTimer = null;
+/** Saved inline styles while EQ graph drag disables text/image selection (Safari + trackpad). */
+let eqGraphDragSelectSaved = null;
+
+function eqGraphDragSelectBlock(ev) {
+    ev.preventDefault();
+}
+
+function eqGraphInstallDragSelectLock() {
+    if (eqGraphDragSelectSaved !== null) {
+        eqGraphRemoveDragSelectLock();
+    }
+    let de = document.documentElement;
+    let b = document.body;
+    eqGraphDragSelectSaved = {
+        deUser: de.style.userSelect,
+        deWebkit: de.style.webkitUserSelect || "",
+        bUser: b.style.userSelect,
+        bWebkit: b.style.webkitUserSelect || "",
+    };
+    de.style.userSelect = "none";
+    de.style.webkitUserSelect = "none";
+    b.style.userSelect = "none";
+    b.style.webkitUserSelect = "none";
+    document.addEventListener("selectstart", eqGraphDragSelectBlock, true);
+    document.addEventListener("dragstart", eqGraphDragSelectBlock, true);
+    let sel = typeof window.getSelection === "function" ? window.getSelection() : null;
+    if (sel && sel.rangeCount > 0) {
+        sel.removeAllRanges();
+    }
+}
+function eqGraphRemoveDragSelectLock() {
+    if (eqGraphDragSelectSaved === null) {
+        return;
+    }
+    let s = eqGraphDragSelectSaved;
+    eqGraphDragSelectSaved = null;
+    let de = document.documentElement;
+    let b = document.body;
+    de.style.userSelect = s.deUser;
+    de.style.webkitUserSelect = s.deWebkit;
+    b.style.userSelect = s.bUser;
+    b.style.webkitUserSelect = s.bWebkit;
+    document.removeEventListener("selectstart", eqGraphDragSelectBlock, true);
+    document.removeEventListener("dragstart", eqGraphDragSelectBlock, true);
+}
+/** @type {(m: number[]) => boolean} */
+let tryEqGraphClickAddFilter = (_m) => false;
+/** @type {(m: number[] | null) => void} */
+let syncEqHoverPreview = (m) => {
+    if (!m && graphPlotHitRect && graphPlotHitRect.node()) {
+        graphPlotHitRect.node().style.cursor = "";
+    }
+};
+let gSpectrum = gr.insert("g", ".curves-g")
+    .attr("class", "music-spectrum-viz")
+    .attr("pointer-events", "none")
+    .attr("transform", "translate(" + pad.l + "," + pad.t + ")")
+    .attr("clip-path", "url(#spectrum-clip-inner)");
+let musicSpectrumPathSel = gSpectrum.append("path")
+    .attr("class", "music-spectrum-fill");
+let musicSpectrumViz = {
+    analyser: null,
+    context: null,
+    floatBuffer: null,
+    rafId: null,
+    pathSel: musicSpectrumPathSel,
+    isActive: () => false,
+    syncSpectrumViz: () => {},
+    ensureBuffer: function () {
+        if (!this.analyser) {
+            return;
+        }
+        let n = this.analyser.frequencyBinCount;
+        if (!this.floatBuffer || this.floatBuffer.length !== n) {
+            this.floatBuffer = new Float32Array(n);
+        }
+    },
+    stop: function () {
+        if (this.rafId !== null) {
+            cancelAnimationFrame(this.rafId);
+            this.rafId = null;
+        }
+        if (this.pathSel) {
+            this.pathSel.attr("d", "");
+        }
+    },
+    tick: function () {
+        let self = musicSpectrumViz;
+        self.rafId = null;
+        if (!self.analyser || !self.floatBuffer || !self.pathSel || !self.context || !self.isActive()) {
+            if (self.pathSel) {
+                self.pathSel.attr("d", "");
+            }
+            return;
+        }
+        self.analyser.getFloatFrequencyData(self.floatBuffer);
+        self.pathSel.attr("d", buildMusicSpectrumPath(self.floatBuffer));
+        self.rafId = requestAnimationFrame(() => self.tick());
+    },
+    start: function () {
+        if (!this.analyser || !this.pathSel) {
+            return;
+        }
+        this.stop();
+        this.rafId = requestAnimationFrame(() => this.tick());
+    }
+};
+/* gamma < 1: fewer polyline vertices in the lowest decades so the fill does not trace FFT
+   leakage point-by-point (looks too gradual on a log frequency axis). */
+let spectrumPathLogSampleGamma = 0.63;
+function buildMusicSpectrumPath(floatFreq) {
+    let ctx = musicSpectrumViz.context;
+    if (!ctx || !floatFreq || !floatFreq.length) {
+        return "";
+    }
+    let sr = ctx.sampleRate;
+    let nyquist = sr / 2;
+    let binCount = floatFreq.length;
+    let hzPerBin = nyquist / binCount;
+    let magAtHz = (f) => {
+        if (f <= 0) {
+            f = 1;
+        }
+        let idx = f / hzPerBin;
+        let i0 = Math.floor(idx);
+        let i1 = Math.min(i0 + 1, binCount - 1);
+        let t = idx - i0;
+        return floatFreq[i0] * (1 - t) + floatFreq[i1] * t;
+    };
+    let x0 = x.domain()[0];
+    let x1 = Math.min(x.domain()[1], nyquist * 0.995);
+    if (x1 <= x0 * 1.02) {
+        return "";
+    }
+    let nPoints = 128;
+    let yBottomLocal = H;
+    let d0 = y.domain()[0];
+    let d1 = y.domain()[1];
+    let dbs = [];
+    let freqs = [];
+    for (let i = 0; i <= nPoints; i++) {
+        let u = i / nPoints;
+        let uEff = u <= 0 ? 0 : Math.pow(u, spectrumPathLogSampleGamma);
+        let f = x0 * Math.pow(x1 / x0, uEff);
+        freqs.push(f);
+        dbs.push(magAtHz(f));
+    }
+    let hi = -Infinity;
+    let lo = Infinity;
+    for (let j = 0; j < dbs.length; j++) {
+        let v = dbs[j];
+        if (Number.isFinite(v)) {
+            hi = Math.max(hi, v);
+            lo = Math.min(lo, v);
+        }
+    }
+    if (!Number.isFinite(hi) || !Number.isFinite(lo)) {
+        return "";
+    }
+    let minSpanDb = 42;
+    let spanDb = Math.max(minSpanDb, hi - lo);
+    let baseDb = hi - spanDb;
+    let pts = [];
+    for (let i = 0; i <= nPoints; i++) {
+        let n = (dbs[i] - baseDb) / spanDb;
+        n = Math.max(0, Math.min(1, n));
+        let spl = d0 + n * (d1 - d0) * 0.92;
+        pts.push([x(freqs[i]) - pad.l, y(spl) - pad.t]);
+    }
+    let d = "M" + pts[0][0] + "," + yBottomLocal;
+    pts.forEach((p) => {
+        d += " L" + p[0] + "," + p[1];
+    });
+    d += " L" + pts[pts.length - 1][0] + "," + yBottomLocal + " Z";
+    return d;
+}
+function hl(p, h, sub) {
+    gpath.selectAll("path").filter(c => {
+        if (c.p !== p) return false;
+        if (sub === undefined || sub === null) return true;
+        return c === p.activeCurves[sub];
+    }).classed("highlight", h);
+}
+let table = doc.select(".curves");
+
+let ld_p1 = 1.1673039782614187;
+function getCurveColor(id, o) {
+    let p1 = ld_p1,
+        p2 = p1*p1,
+        p3 = p2*p1;
+    let t = o/32;
+    let i=id/p3+0.76, j=id/p2+0.79, k=id/p1+0.32;
+    if (id < 0) { return d3.hcl(360*(1-(-i)%1),5,66); } // Target
+    let th = 2*Math.PI*i;
+    i += Math.cos(th-0.3)/24 + Math.cos(6*th)/32;
+    let s = Math.sin(2*Math.PI*i);
+    return d3.hcl(360*((i + t/p2)%1),
+                  88+30*(j%1 + 1.3*s - t/p3),
+                  36+22*(k%1 + 1.1*s + 6*t*(1-s)));
+}
+let getColor_AC = c => getCurveColor(c.p.id, c.o);
+let getColor_ph = (p,i) => getCurveColor(p.id, p.activeCurves[i].o);
+function getDivColor(id, active) {
+    let c = getCurveColor(id,0);
+    c.l = 100-(80-Math.min(c.l,60))/(active?1.5:3);
+    c.c = (c.c-20)/(active?3:4);
+    return c;
+}
+function color_curveToText(c) {
+    return c;
+} 
+
+function stopInspect() { gr.selectAll(".inspector").remove(); }
+graphPlotHitRect = gr.append("rect")
+    .attr("class", "graph-plot-hit")
+    .style("touch-action", "none")
+    .attrs({x:pad.l,y:pad.t,width:W,height:H,opacity:0})
+    .on("mousemove", graphInteract())
+    .on("mouseout", () => {
+        if (eqGraphPointerState) {
+            return;
+        }
+        /* After pointer capture release, some browsers emit mouseout even though the cursor is
+           still over the plot; defer and re-hit-test so EQ hover / path highlight stay in sync. */
+        let plot = graphPlotHitRect && graphPlotHitRect.node();
+        let ev = d3.event;
+        let cx = ev && typeof ev.clientX === "number" ? ev.clientX : NaN;
+        let cy = ev && typeof ev.clientY === "number" ? ev.clientY : NaN;
+        requestAnimationFrame(() => {
+            if (eqGraphPointerState) {
+                return;
+            }
+            if (plot && Number.isFinite(cx) && Number.isFinite(cy)) {
+                let r = plot.getBoundingClientRect();
+                if (cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom) {
+                    lastGraphPlotPointerClient = { x: cx, y: cy };
+                    let m = clientToGraphPlotXY(cx, cy);
+                    if (m) {
+                        syncEqHoverPreview(m);
+                    }
+                    return;
+                }
+            }
+            syncEqHoverPreview(null);
+            interactInspect ? stopInspect() : pathHL(false);
+        });
+    })
+    .on("click", graphInteract(true));
+gEqSoundRangeBrush.raise();
+gEqFilterMarkers.raise();
+gEqHoverPreview.raise();
+
+/** SVG user-space [x,y] matching d3.mouse(plot rect); works with native event listeners (d3.mouse does not). */
+function clientToGraphPlotXY(clientX, clientY) {
+    let plot = graphPlotHitRect && graphPlotHitRect.node();
+    if (!plot) {
+        return null;
+    }
+    let svg = plot.ownerSVGElement || (plot.closest && plot.closest("svg"));
+    if (!svg || !svg.createSVGPoint) {
+        return null;
+    }
+    let ctm = svg.getScreenCTM();
+    if (!ctm) {
+        return null;
+    }
+    let pt = svg.createSVGPoint();
+    pt.x = clientX;
+    pt.y = clientY;
+    let p = pt.matrixTransform(ctm.inverse());
+    return [p.x, p.y];
+}
+
+/** Inverse of clientToGraphPlotXY: graph SVG coords → viewport client pixels. */
+function graphPlotXYToClient(svgX, svgY) {
+    let plot = graphPlotHitRect && graphPlotHitRect.node();
+    if (!plot) {
+        return null;
+    }
+    let svg = plot.ownerSVGElement || (plot.closest && plot.closest("svg"));
+    if (!svg || !svg.createSVGPoint) {
+        return null;
+    }
+    let ctm = svg.getScreenCTM();
+    if (!ctm) {
+        return null;
+    }
+    let pt = svg.createSVGPoint();
+    pt.x = svgX;
+    pt.y = svgY;
+    let p = pt.matrixTransform(ctm);
+    return [p.x, p.y];
+}
+
+doc.select("#inspector").on("click", function () {
+    clearLabels();
+    stopInspect();
+    d3.select(this).classed("selected", interactInspect = !interactInspect);
+});
+
+doc.select("#expandTools").on("click", function () {
+    let t=doc.select(".tools"), cl="collapseTools", v=!t.classed(cl);
+    [t,doc.select(".targets")].forEach(s=>s.classed(cl, v));
+});
+
+d3.selectAll(".helptip").on("click", function() {
+    let e = d3.select(this);
+    e.classed("active", !e.classed("active"));
+});
